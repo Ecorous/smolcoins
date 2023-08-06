@@ -39,10 +39,9 @@ public abstract class ItemMixin extends Item{
 		if (this.getBlock() instanceof ChestBlock && this.getName().toString().equalsIgnoreCase("[admin] smolcoin convertor")) {
 			if (context.getPlayer() == null) {
 				cir.cancel();
-			} else if (!context.getPlayer().getAbilities().creativeMode || context.getPlayer().getPermissionLevel() <= 2) {
+			} else if (!(context.getPlayer().getAbilities().creativeMode || context.getPlayer().getPermissionLevel() <= 2)) {
 				cir.cancel();
 			}
 		}
-		Smolcoins.INSTANCE.getLOGGER().info("This line is printed by an example mod mixin!");
 	}
 }

@@ -23,6 +23,7 @@ object Smolcoins : ModInitializer {
         Identifier("minecraft", "diamond") to 45,
         Identifier("minecraft", "iron_ingot") to 5,
         Identifier("minecraft", "gold_ingot") to 5,
+        Identifier("minecraft", "netherite_ingot") to 100,
     )
     val SMOLCOIN_SETTINGS = QuiltItemSettings()
     val LOGGER: Logger = LoggerFactory.getLogger("smolcoins")

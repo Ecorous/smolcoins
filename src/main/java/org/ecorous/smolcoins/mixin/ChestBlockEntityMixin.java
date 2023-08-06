@@ -51,15 +51,12 @@ public abstract class ChestBlockEntityMixin {
 
 	@Inject(method = "onScheduledTick", at = @At("TAIL"))
 	public void smolcoins$onScheduledTick(CallbackInfo ci) {
-		Smolcoins.INSTANCE.getLOGGER().info("mixin works ig");
 		Gson gson = new Gson();
 		String original = ((BlockEntity)(Object)this).toNbt().get("CustomName").toString();
 		String finalJson = removeFirstAndLastCharacter(original);
-		Smolcoins.INSTANCE.getLOGGER().info("oh yes it's this: {}", finalJson);
 		TextObject x = gson.fromJson(finalJson, TextObject.class);
 		String customName = x.text;
 		if (customName.equalsIgnoreCase("[admin] smolcoin convertor")) {
-			Smolcoins.INSTANCE.getLOGGER().info("*types*- I'm in");
 			for (int slot = 0; slot < this.inventory.size(); slot++) {
 				ItemStack itemStack = this.inventory.get(slot);
 				Item item = itemStack.getItem();
@@ -84,8 +81,6 @@ public abstract class ChestBlockEntityMixin {
 					}
 				}
 			}
-		} else {
-			Smolcoins.INSTANCE.getLOGGER().info(customName);
 		}
 	}
 }

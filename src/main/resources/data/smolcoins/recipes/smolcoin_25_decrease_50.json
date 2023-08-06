@@ -1,0 +1,12 @@
+ {
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "smolcoins:smolcoin_50"
+    }
+  ],
+  "result": {
+    "item": "smolcoins:smolcoin_25",
+    "count": 2
+  }
+}

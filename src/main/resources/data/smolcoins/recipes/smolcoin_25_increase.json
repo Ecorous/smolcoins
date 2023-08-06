@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "CCC",
+    " C "
+  ],
+  "key": {
+    "C": {
+      "item": "smolcoins:smolcoin_5"
+    }
+  },
+  "result": {
+    "item": "smolcoins:smolcoin_25"
+  }
+}
+
