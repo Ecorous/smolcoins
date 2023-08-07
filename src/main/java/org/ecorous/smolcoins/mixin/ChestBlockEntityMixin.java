@@ -51,36 +51,46 @@ public abstract class ChestBlockEntityMixin {
 
 	@Inject(method = "onScheduledTick", at = @At("TAIL"))
 	public void smolcoins$onScheduledTick(CallbackInfo ci) {
-		Gson gson = new Gson();
-		String original = ((BlockEntity)(Object)this).toNbt().get("CustomName").toString();
-		String finalJson = removeFirstAndLastCharacter(original);
-		TextObject x = gson.fromJson(finalJson, TextObject.class);
-		String customName = x.text;
-		if (customName.equalsIgnoreCase("[admin] smolcoin convertor")) {
-			for (int slot = 0; slot < this.inventory.size(); slot++) {
-				ItemStack itemStack = this.inventory.get(slot);
-				Item item = itemStack.getItem();
-				Identifier itemId = Registries.ITEM.getId(item);
-				Integer value = Smolcoins.INSTANCE.getSMOLCOIN_CONVERSION().get(itemId);
+		try {
+			Gson gson = new Gson();
+			NbtElement original = ((BlockEntity) (Object) this).toNbt().get("CustomName");
+			if (original != null) {
+				String strOriginal = original.toString();
+				String finalJson = removeFirstAndLastCharacter(strOriginal);
+				TextObject x = gson.fromJson(finalJson, TextObject.class);
+				String customName = x.text;
+				if (customName.equalsIgnoreCase("[admin] smolcoin convertor")) {
+					for (int slot = 0; slot < this.inventory.size(); slot++) {
+						ItemStack itemStack = this.inventory.get(slot);
+						Item item = itemStack.getItem();
+						Identifier itemId = Registries.ITEM.getId(item);
+						Integer value = Smolcoins.INSTANCE.getSMOLCOIN_CONVERSION().get(itemId);
 
-				if (value != null) {
-					int count = itemStack.getCount();
-					int smolcoinValue = value;
+						if (value != null) {
+							int count = itemStack.getCount();
+							int smolcoinValue = value;
 
-					int totalSmolcoins = smolcoinValue * count;
+							int totalSmolcoins = smolcoinValue * count;
 
-					List<ItemStack> itemStacks = Arrays.stream(Smolcoins.INSTANCE.smolcoinsToItems(totalSmolcoins)).toList();
-					if (!itemStacks.isEmpty()) {
-						inventory.set(slot, ItemStack.EMPTY);
-					}
-					for (ItemStack i : itemStacks) {
-						Integer newSlot = Smolcoins.INSTANCE.getNextEmptySlot(inventory);
-						if (newSlot != null) {
-							inventory.set(newSlot, i);
+							List<ItemStack> itemStacks = Arrays.stream(Smolcoins.INSTANCE.smolcoinsToItems(totalSmolcoins)).toList();
+							if (!itemStacks.isEmpty()) {
+								inventory.set(slot, ItemStack.EMPTY);
+							}
+							for (ItemStack i : itemStacks) {
+								Integer newSlot = Smolcoins.INSTANCE.getNextEmptySlot(inventory);
+								if (newSlot != null) {
+									inventory.set(newSlot, i);
+								}
+							}
 						}
 					}
 				}
 			}
+		}
+		catch (Exception e) {
+			Smolcoins.INSTANCE.getLOGGER().error("Hopefully stopping crash <3");
+			e.printStackTrace();
+
 		}
 	}
 }
