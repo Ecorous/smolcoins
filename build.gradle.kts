@@ -55,7 +55,6 @@ dependencies {
 	// modImplementation(libs.bundles.qfapi) // If you wish to use the deprecated Fabric API modules
 
 	modImplementation(libs.qkl)
-	modImplementation(libs.owo.lib)
 
 	implementation(libs.kotlinx.serialization)
 
