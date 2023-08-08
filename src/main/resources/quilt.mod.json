@@ -22,6 +22,10 @@
 			"init": {
 				"adapter": "kotlin",
 				"value": "org.ecorous.smolcoins.Smolcoins"
+			},
+			"client_init": {
+				"adapter": "kotlin",
+				"value": "org.ecorous.smolcoins.SmolcoinsClient"
 			}
 		},
 		"depends": [
@@ -42,7 +46,5 @@
 				"versions": ">=1.20"
 			}
 		]
-	},
-	"mixin": "smolcoins.mixins.json",
-	"access_widener": ["smolcoins.accesswidener"]
+	}
 }

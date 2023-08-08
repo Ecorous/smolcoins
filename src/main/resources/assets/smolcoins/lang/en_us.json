@@ -4,5 +4,7 @@
   "item.smolcoins.smolcoin_10": "10 Smolcoins",
   "item.smolcoins.smolcoin_25": "25 Smolcoins",
   "item.smolcoins.smolcoin_50": "50 Smolcoins",
-  "item.smolcoins.smolcoin_100": "100 Smolcoins"
+  "item.smolcoins.smolcoin_100": "100 Smolcoins",
+
+  "block.smolcoins.exchange": "Smolcoin Exchange"
 }

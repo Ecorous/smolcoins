@@ -1,16 +1,34 @@
 package org.ecorous.smolcoins
 
+import net.minecraft.client.gui.screen.ingame.HandledScreens
+import net.minecraft.feature_flags.FeatureFlags
+import net.minecraft.inventory.Inventory
+import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraft.item.Items
 import net.minecraft.registry.Registries
+import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
 import org.quiltmc.loader.api.ModContainer
+import org.quiltmc.loader.api.minecraft.ClientOnly
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings
 import org.quiltmc.qkl.library.registry.*
+import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer
+import org.quiltmc.qsl.block.entity.api.QuiltBlockEntityTypeBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+@ClientOnly
+object SmolcoinsClient : ClientModInitializer {
+    override fun onInitializeClient(mod: ModContainer?) {
+        HandledScreens.register(Smolcoins.exchangeScreenHandlerType) { handler, playerInventory, _ ->
+            SmolcoinExchangeScreen(handler, playerInventory)
+        }
+    }
+}
 
 object Smolcoins : ModInitializer {
     private fun id(id: String): Identifier {
@@ -18,12 +36,12 @@ object Smolcoins : ModInitializer {
     }
 
     val SMOLCOIN_CONVERSION = mapOf(
-        Identifier("minecraft", "copper_block") to 5,
-        Identifier("minecraft", "coal") to 1,
-        Identifier("minecraft", "diamond") to 45,
-        Identifier("minecraft", "iron_ingot") to 5,
-        Identifier("minecraft", "gold_ingot") to 5,
-        Identifier("minecraft", "netherite_ingot") to 100,
+        Items.COPPER_BLOCK to 5,
+        Items.COAL to 1,
+        Items.DIAMOND to 45,
+        Items.IRON_INGOT to 5,
+        Items.GOLD_INGOT to 5,
+        Items.NETHERITE_INGOT to 100,
     )
     private val SMOLCOIN_SETTINGS = QuiltItemSettings()
     val LOGGER: Logger = LoggerFactory.getLogger("smolcoins")
@@ -35,6 +53,12 @@ object Smolcoins : ModInitializer {
     val smolcoin_50: Item = Item(SMOLCOIN_SETTINGS)
     val smolcoin_100: Item = Item(SMOLCOIN_SETTINGS)
 
+    val exchangeBlockItem = BlockItem(SmolcoinExchangeBlock, QuiltItemSettings())
+    val exchangeBlockEntity = QuiltBlockEntityTypeBuilder.create({ pos, state -> SmolcoinExchangeBlockEntity(pos, state) }, SmolcoinExchangeBlock).build()
+    val exchangeScreenHandlerType = ScreenHandlerType({syncId, playerInventory ->
+        SmolcoinExchangeScreenHandler(syncId, playerInventory)
+    }, FeatureFlags.DEFAULT_SET)
+
     override fun onInitialize(mod: ModContainer) {
         Registries.ITEM {
             smolcoin_1 withId id("smolcoin_1")
@@ -43,6 +67,16 @@ object Smolcoins : ModInitializer {
             smolcoin_25 withId id("smolcoin_25")
             smolcoin_50 withId id("smolcoin_50")
             smolcoin_100 withId id("smolcoin_100")
+            exchangeBlockItem withId id("exchange")
+        }
+        Registries.BLOCK {
+            SmolcoinExchangeBlock withId id("exchange")
+        }
+        Registries.BLOCK_ENTITY_TYPE {
+            exchangeBlockEntity withId id("exchange")
+        }
+        Registries.SCREEN_HANDLER_TYPE {
+            exchangeScreenHandlerType withId id("exchange")
         }
         LOGGER.info("Hello Quilt world from {}!", mod.metadata()?.name())
     }
@@ -78,14 +112,4 @@ object Smolcoins : ModInitializer {
             itemStacks.reduce { acc, itemStack -> acc.also { it.count += itemStack.count } }
         }.toTypedArray()
     }
-
-    fun getNextEmptySlot(inventory: DefaultedList<ItemStack>): Int? {
-        for ((index, item) in inventory.withIndex()) {
-            if (item == null || item.isEmpty) {
-                return index
-            }
-        }
-        return null
-    }
-
 }

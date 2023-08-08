@@ -142,7 +142,3 @@ publishing {
 		// retrieving dependencies.
 	}
 }
-
-loom {
-	accessWidenerPath.set(file("src/main/resources/smolcoins.accesswidener"))
-}
