@@ -8,6 +8,7 @@ plugins {
 	`maven-publish`
 
 	alias(libs.plugins.kotlin)
+	kotlin("plugin.serialization") version libs.versions.kotlin
 	alias(libs.plugins.quilt.loom)
 }
 
@@ -55,6 +56,8 @@ dependencies {
 
 	modImplementation(libs.qkl)
 	modImplementation(libs.owo.lib)
+
+	implementation(libs.kotlinx.serialization)
 
 }
 
@@ -141,8 +144,4 @@ publishing {
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
 	}
-}
-
-loom {
-	accessWidenerPath.set(file("src/main/resources/smolcoins.accesswidener"))
 }

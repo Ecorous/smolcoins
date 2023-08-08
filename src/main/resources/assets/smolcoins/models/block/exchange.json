@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "smolcoins:block/exchange_bottom",
+    "east": "smolcoins:block/exchange_side",
+    "north": "smolcoins:block/exchange_side",
+    "particle": "smolcoins:block/exchange_side",
+    "south": "smolcoins:block/exchange_side",
+    "up": "smolcoins:block/exchange_top",
+    "west": "smolcoins:block/exchange_side"
+  }
+}
