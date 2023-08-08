@@ -6,6 +6,7 @@
     "minecraft:iron_ingot": 5,
     "minecraft:gold_ingot": 5,
     "minecraft:diamond": 45,
+    "minecraft:emerald": 30,
     "minecraft:netherite_ingot": 100
   }
 }
