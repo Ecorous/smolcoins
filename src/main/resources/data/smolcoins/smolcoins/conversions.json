@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": {
+    "minecraft:coal": 1,
+    "minecraft:copper_block": 5,
+    "minecraft:iron_ingot": 5,
+    "minecraft:gold_ingot": 5,
+    "minecraft:diamond": 45,
+    "minecraft:netherite_ingot": 100
+  }
+}

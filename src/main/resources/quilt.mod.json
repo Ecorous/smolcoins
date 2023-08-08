@@ -6,14 +6,15 @@
 		"version": "${version}",
 		"metadata": {
 			"name": "smolcoins",
-			"description": "A short description of your mod.",
+			"description": "coins, but smol",
 			"contributors": {
-				"Your name here": "Owner"
+				"ecorous": "Owner",
+				"maestoso": "Developer"
 			},
 			"contact": {
-				"homepage": "https://example.com/",
-				"issues": "https://github.com/QuiltMC/quilt-kotlin-template-mod/issues",
-				"sources": "https://github.com/QuiltMC/quilt-kotlin-template-mod"
+				"homepage": "https://packs.ecorous.org/pack/smolmc",
+				"issues": "https://github.com/ecorous/smolcoins/issues",
+				"sources": "https://github.com/ecorous/smolcoins"
 			},
 			"icon": "assets/smolcoins/icon.png"
 		},

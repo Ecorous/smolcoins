@@ -16,6 +16,7 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.registry.Registries
 import net.minecraft.screen.NamedScreenHandlerFactory
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.slot.FurnaceOutputSlot
@@ -58,7 +59,7 @@ class SmolcoinExchangeBlockEntity(pos: BlockPos, state: BlockState) : BlockEntit
     fun tick(world: World, pos: BlockPos) {
         if(world.isClient) return
         if(inventory[0].isEmpty) return
-        val coinCount = Smolcoins.SMOLCOIN_CONVERSION[inventory[0].item] ?: 0
+        val coinCount = Smolcoins.smolcoinConversions[Registries.ITEM.getId(inventory[0].item)] ?: 0
         if(coinCount == 0) return
         val coinsToDispense = Smolcoins.smolcoinsToItems(coinCount)
         println(coinsToDispense.size)

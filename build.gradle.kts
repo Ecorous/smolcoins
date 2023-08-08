@@ -8,6 +8,7 @@ plugins {
 	`maven-publish`
 
 	alias(libs.plugins.kotlin)
+	kotlin("plugin.serialization") version libs.versions.kotlin
 	alias(libs.plugins.quilt.loom)
 }
 
@@ -55,6 +56,8 @@ dependencies {
 
 	modImplementation(libs.qkl)
 	modImplementation(libs.owo.lib)
+
+	implementation(libs.kotlinx.serialization)
 
 }
 

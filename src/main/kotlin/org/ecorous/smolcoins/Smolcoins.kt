@@ -1,27 +1,29 @@
 package org.ecorous.smolcoins
 
-import kotlinx.serialization.json.JsonNull.content
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
+import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.gui.screen.ingame.HandledScreens
 import net.minecraft.feature_flags.FeatureFlags
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.BlockItem
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
+import net.minecraft.item.*
 import net.minecraft.registry.Registries
+import net.minecraft.resource.ResourceManager
+import net.minecraft.resource.ResourceType
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
-import net.minecraft.util.collection.DefaultedList
 import org.quiltmc.loader.api.ModContainer
 import org.quiltmc.loader.api.minecraft.ClientOnly
-import org.quiltmc.qsl.base.api.entrypoint.ModInitializer
-import org.quiltmc.qsl.item.setting.api.QuiltItemSettings
 import org.quiltmc.qkl.library.registry.*
+import org.quiltmc.qsl.base.api.entrypoint.ModInitializer
 import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer
 import org.quiltmc.qsl.block.entity.api.QuiltBlockEntityTypeBuilder
+import org.quiltmc.qsl.item.setting.api.QuiltItemSettings
+import org.quiltmc.qsl.resource.loader.api.ResourceLoader
+import org.quiltmc.qsl.resource.loader.api.reloader.SimpleSynchronousResourceReloader
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -33,20 +35,14 @@ object SmolcoinsClient : ClientModInitializer {
         }
     }
 }
-
+@Serializable
+data class SmolcoinConversionJson(val replace: Boolean, val values: Map<String, Int>)
 object Smolcoins : ModInitializer {
+    var smolcoinConversions = mutableMapOf<Identifier, Int>()
     private fun id(id: String): Identifier {
         return Identifier("smolcoins", id)
     }
 
-    val SMOLCOIN_CONVERSION = mapOf(
-        Items.COPPER_BLOCK to 5,
-        Items.COAL to 1,
-        Items.DIAMOND to 45,
-        Items.IRON_INGOT to 5,
-        Items.GOLD_INGOT to 5,
-        Items.NETHERITE_INGOT to 100,
-    )
     private val SMOLCOIN_SETTINGS = QuiltItemSettings()
     val LOGGER: Logger = LoggerFactory.getLogger("smolcoins")
 
@@ -58,12 +54,12 @@ object Smolcoins : ModInitializer {
     val smolcoin_100: Item = Item(SMOLCOIN_SETTINGS)
 
     val exchangeBlockItem = BlockItem(SmolcoinExchangeBlock, QuiltItemSettings())
-    val exchangeBlockEntity = QuiltBlockEntityTypeBuilder.create({ pos, state -> SmolcoinExchangeBlockEntity(pos, state) }, SmolcoinExchangeBlock).build()
+    val exchangeBlockEntity: BlockEntityType<SmolcoinExchangeBlockEntity> = QuiltBlockEntityTypeBuilder.create({ pos, state -> SmolcoinExchangeBlockEntity(pos, state) }, SmolcoinExchangeBlock).build()
     val exchangeScreenHandlerType = ScreenHandlerType({syncId, playerInventory ->
         SmolcoinExchangeScreenHandler(syncId, playerInventory)
     }, FeatureFlags.DEFAULT_SET)
 
-    val itemGroup = FabricItemGroup.builder()
+    val itemGroup: ItemGroup = FabricItemGroup.builder()
         .icon { smolcoin_100.defaultStack }
         .name(Text.translatable("smolcoins.name"))
         .entries { _, entries ->
@@ -76,6 +72,7 @@ object Smolcoins : ModInitializer {
             entries.addItem(smolcoin_100)
         }
         .build()
+    @OptIn(ExperimentalSerializationApi::class)
     override fun onInitialize(mod: ModContainer) {
         Registries.ITEM {
             smolcoin_1 withId id("smolcoin_1")
@@ -98,6 +95,29 @@ object Smolcoins : ModInitializer {
         Registries.ITEM_GROUP {
             itemGroup withId id("smolcoins")
         }
+        ResourceLoader.get(ResourceType.SERVER_DATA).registerReloader(object : SimpleSynchronousResourceReloader {
+            override fun reload(manager: ResourceManager) {
+                for((id, res) in manager.findResources("smolcoins") { path ->
+                    path.path.endsWith("conversions.json")
+                }) {
+                    try {
+                        res.open().use { stream ->
+                            val json = Json.decodeFromStream<SmolcoinConversionJson>(stream)
+                            if(json.replace) {
+                                smolcoinConversions = json.values.mapKeys { Identifier(it.key) } as MutableMap<Identifier, Int>
+                            } else {
+                                smolcoinConversions.putAll(json.values.mapKeys {Identifier(it.key)})
+                            }
+                        }
+                    } catch (e: Exception) {
+                        LOGGER.error("Error occurred while loading resource json $id", e)
+                    }
+                }
+            }
+
+            override fun getQuiltId() = id("conversions")
+
+        })
         LOGGER.info("Hello Quilt world from {}!", mod.metadata()?.name())
     }
 
