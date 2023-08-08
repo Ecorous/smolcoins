@@ -1,5 +1,8 @@
 package org.ecorous.smolcoins
 
+import kotlinx.serialization.json.JsonNull.content
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.minecraft.client.gui.screen.ingame.HandledScreens
 import net.minecraft.feature_flags.FeatureFlags
 import net.minecraft.inventory.Inventory
@@ -9,6 +12,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.registry.Registries
 import net.minecraft.screen.ScreenHandlerType
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
 import org.quiltmc.loader.api.ModContainer
@@ -59,6 +63,19 @@ object Smolcoins : ModInitializer {
         SmolcoinExchangeScreenHandler(syncId, playerInventory)
     }, FeatureFlags.DEFAULT_SET)
 
+    val itemGroup = FabricItemGroup.builder()
+        .icon { smolcoin_100.defaultStack }
+        .name(Text.translatable("smolcoins.name"))
+        .entries { _, entries ->
+            entries.addItem(exchangeBlockItem)
+            entries.addItem(smolcoin_1)
+            entries.addItem(smolcoin_5)
+            entries.addItem(smolcoin_10)
+            entries.addItem(smolcoin_25)
+            entries.addItem(smolcoin_50)
+            entries.addItem(smolcoin_100)
+        }
+        .build()
     override fun onInitialize(mod: ModContainer) {
         Registries.ITEM {
             smolcoin_1 withId id("smolcoin_1")
@@ -77,6 +94,9 @@ object Smolcoins : ModInitializer {
         }
         Registries.SCREEN_HANDLER_TYPE {
             exchangeScreenHandlerType withId id("exchange")
+        }
+        Registries.ITEM_GROUP {
+            itemGroup withId id("smolcoins")
         }
         LOGGER.info("Hello Quilt world from {}!", mod.metadata()?.name())
     }
