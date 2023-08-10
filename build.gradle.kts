@@ -23,7 +23,7 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
-	maven { url = uri("https://maven.wispforest.io") }
+	maven("https://maven.terraformersmc.com/")
 }
 
 // All the dependencies are declared at gradle/libs.version.toml and referenced with "libs.<id>"
@@ -55,10 +55,13 @@ dependencies {
 	// modImplementation(libs.bundles.qfapi) // If you wish to use the deprecated Fabric API modules
 
 	modImplementation(libs.qkl)
-	modImplementation(libs.owo.lib)
 
 	implementation(libs.kotlinx.serialization)
 
+	val emiVersion = "1.0.19+1.20.1" // TODO idk why i can't put this in libs.versions.toml
+
+	modCompileOnly("dev.emi:emi-fabric:$emiVersion:api")
+	modLocalRuntime("dev.emi:emi-fabric:$emiVersion")
 }
 
 tasks {

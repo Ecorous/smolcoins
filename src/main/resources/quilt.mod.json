@@ -22,11 +22,15 @@
 		"entrypoints": {
 			"init": {
 				"adapter": "kotlin",
-				"value": "org.ecorous.smolcoins.Smolcoins"
+				"value": "org.ecorous.smolcoins.init.SmolcoinsInit"
 			},
 			"client_init": {
 				"adapter": "kotlin",
-				"value": "org.ecorous.smolcoins.SmolcoinsClient"
+				"value": "org.ecorous.smolcoins.init.SmolcoinsClientInit"
+			},
+			"emi": {
+				"adapter": "kotlin",
+				"value": "org.ecorous.smolcoins.emi.SmolcoinsEmiPlugin"
 			}
 		},
 		"depends": [
