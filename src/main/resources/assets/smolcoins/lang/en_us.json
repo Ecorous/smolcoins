@@ -8,5 +8,8 @@
   "item.smolcoins.smolcoin_50": "50 Smolcoins",
   "item.smolcoins.smolcoin_100": "100 Smolcoins",
 
-  "block.smolcoins.exchange": "Smolcoin Exchange"
+  "tag.item.smolcoins.smolcoins": "Smolcoin (any value)",
+
+  "block.smolcoins.exchange": "Smolcoin Exchange",
+  "emi.category.smolcoins.exchange": "Smolcoin Exchanging"
 }

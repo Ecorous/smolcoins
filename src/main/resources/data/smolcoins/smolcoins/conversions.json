@@ -6,6 +6,13 @@
     "minecraft:iron_ingot": 5,
     "minecraft:gold_ingot": 5,
     "minecraft:diamond": 45,
-    "minecraft:netherite_ingot": 100
+    "minecraft:netherite_ingot": 100,
+
+    "smolcoins:smolcoin_100": 100,
+    "smolcoins:smolcoin_50": 50,
+    "smolcoins:smolcoin_25": 25,
+    "smolcoins:smolcoin_10": 10,
+    "smolcoins:smolcoin_5": 5,
+    "smolcoins:smolcoin_1": 1
   }
 }

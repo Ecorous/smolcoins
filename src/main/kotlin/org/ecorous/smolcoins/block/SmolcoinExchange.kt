@@ -1,6 +1,13 @@
 package org.ecorous.smolcoins.block
 
 import com.mojang.blaze3d.systems.RenderSystem
+import dev.emi.emi.api.EmiRegistry
+import dev.emi.emi.api.recipe.EmiRecipe
+import dev.emi.emi.api.recipe.EmiRecipeCategory
+import dev.emi.emi.api.render.EmiTexture
+import dev.emi.emi.api.stack.EmiIngredient
+import dev.emi.emi.api.stack.EmiStack
+import dev.emi.emi.api.widget.WidgetHolder
 import net.minecraft.block.BlockRenderType
 import net.minecraft.block.BlockState
 import net.minecraft.block.BlockWithEntity
@@ -17,6 +24,7 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.recipe.Ingredient
 import net.minecraft.registry.Registries
 import net.minecraft.screen.NamedScreenHandlerFactory
 import net.minecraft.screen.ScreenHandler
@@ -35,8 +43,11 @@ import net.minecraft.world.World
 import org.ecorous.smolcoins.SmolcoinsItems
 import org.ecorous.smolcoins.block.SmolcoinExchange.exchangeBlockEntity
 import org.ecorous.smolcoins.block.SmolcoinExchange.exchangeScreenHandlerType
+import org.ecorous.smolcoins.block.SmolcoinExchange.itemsToSmolcoins
 import org.ecorous.smolcoins.block.SmolcoinExchange.smolcoinConversions
 import org.ecorous.smolcoins.block.SmolcoinExchange.smolcoinsToItems
+import org.ecorous.smolcoins.block.SmolcoinExchangeEmiRecipe.Companion.EMI_CATEGORY
+import org.ecorous.smolcoins.block.SmolcoinExchangeEmiRecipe.Companion.EMI_WORKSTATION
 import org.ecorous.smolcoins.init.SmolcoinsInit
 import org.quiltmc.loader.api.minecraft.ClientOnly
 import org.quiltmc.qkl.library.registry.invoke
@@ -44,12 +55,10 @@ import org.quiltmc.qsl.block.entity.api.QuiltBlockEntityTypeBuilder
 import org.quiltmc.qsl.block.extensions.api.QuiltBlockSettings
 
 object SmolcoinExchange {
+
     var smolcoinConversions = mutableMapOf<Identifier, Int>()
     val exchangeBlockEntity: BlockEntityType<SmolcoinExchangeBlockEntity> = QuiltBlockEntityTypeBuilder.create({ pos, state ->
-        SmolcoinExchangeBlockEntity(
-            pos,
-            state
-        )
+        SmolcoinExchangeBlockEntity(pos, state)
     }, SmolcoinExchangeBlock).build()
     val exchangeScreenHandlerType = ScreenHandlerType({ syncId, playerInventory ->
         SmolcoinExchangeScreenHandler(syncId, playerInventory)
@@ -63,6 +72,14 @@ object SmolcoinExchange {
         }
         Registries.SCREEN_HANDLER_TYPE {
             exchangeScreenHandlerType withId SmolcoinsInit.id("exchange")
+        }
+    }
+    @ClientOnly
+    internal fun initEmi(registry: EmiRegistry) {
+        registry.addCategory(EMI_CATEGORY)
+        registry.addWorkstation(EMI_CATEGORY, EMI_WORKSTATION)
+        for(recipe in smolcoinConversions.map { entry -> SmolcoinExchangeEmiRecipe(entry.key, entry.value)}) {
+            registry.addRecipe(recipe)
         }
     }
     fun smolcoinsToItems(smolcoins: Int): Array<ItemStack> {
@@ -92,11 +109,54 @@ object SmolcoinExchange {
 
         items.add(ItemStack(SmolcoinsItems.smolcoin_1, remainingSmolcoins))
 
-        return items.groupBy { it.item }.map { (_, itemStacks) ->
-            itemStacks.reduce { acc, itemStack -> acc.also { it.count += itemStack.count } }
-        }.toTypedArray()
+        return items.toTypedArray()
+    }
+    fun itemsToSmolcoins(items: Array<ItemStack>): Int {
+        val smolcoins100 = items.getOrNull(0)?.count ?: 0
+        val smolcoins50 = items.getOrNull(1)?.count ?: 0
+        val smolcoins25 = items.getOrNull(2)?.count ?: 0
+        val smolcoins10 = items.getOrNull(3)?.count ?: 0
+        val smolcoins5 = items.getOrNull(4)?.count ?: 0
+        val smolcoins1 = items.getOrNull(5)?.count ?: 0
+        return (smolcoins100 * 100) + (smolcoins50 * 50) + (smolcoins25 * 25) + (smolcoins10 * 10) + (smolcoins5 * 5) + smolcoins1
     }
 }
+@ClientOnly
+class SmolcoinExchangeEmiRecipe(val item: Identifier, val coins: Int) : EmiRecipe {
+    override fun getCategory() = EMI_CATEGORY
+
+    override fun getId() = SmolcoinsInit.id("/exchange/${item.namespace}/${item.path}")
+
+    override fun getInputs() = mutableListOf(EmiIngredient.of(Ingredient.ofItems(Registries.ITEM.get(item))))
+
+    override fun getOutputs() = smolcoinsToItems(coins).map(EmiStack::of) as MutableList<EmiStack>
+
+    override fun getDisplayWidth() = 64
+
+    override fun getDisplayHeight() = 64
+    override fun supportsRecipeTree() = false
+    override fun addWidgets(widgets: WidgetHolder) {
+        with(widgets) {
+            addSlot(inputs[0], 23, 24)
+            val slots = listOf(23 to 3, 44 to 15, 44 to 36, 23 to 45, 2 to 36, 2 to 15)
+
+            for(i in 0 until 6) {
+                addTexture(EmiTexture(SmolcoinExchangeScreen.TEXTURE, 80, 14, 18, 18), slots[i].first, slots[i].second)
+            }
+            for(i in 0 until outputs.size) {
+                if(outputs[i].isEmpty) continue
+                addSlot(outputs[i], slots[i].first, slots[i].second)
+            }
+            addText(Text.literal(coins.toString()), 44, 4, 0, false)
+            // i am 90% sure this has to loop through twice because for whatever reason get() on MutableList isn't nullable so i can't just use an elvis operator
+        }
+    }
+    companion object {
+        internal val EMI_WORKSTATION = EmiStack.of(SmolcoinsItems.exchangeBlockItem)
+        internal val EMI_CATEGORY = EmiRecipeCategory(SmolcoinsInit.id("exchange"), EMI_WORKSTATION, EMI_WORKSTATION)
+    }
+}
+
 object SmolcoinExchangeBlock : BlockWithEntity(QuiltBlockSettings.create().sounds(BlockSoundGroup.WOOD).strength(Float.MAX_VALUE)) {
     override fun createBlockEntity(pos: BlockPos, state: BlockState) = SmolcoinExchangeBlockEntity(pos, state)
     override fun <T : BlockEntity?> getTicker(
@@ -142,6 +202,10 @@ class SmolcoinExchangeBlockEntity(pos: BlockPos, state: BlockState) : BlockEntit
             }
         }
         inventory[0].decrement(1)
+        val allCoins = smolcoinsToItems(itemsToSmolcoins(inventory.subList(1, inventory.size).toTypedArray()))
+        for(i in 0 until 6) {
+            inventory[i + 1] = allCoins[i]
+        }
     }
 
     private fun tryInsert(index: Int, stack: ItemStack): Boolean {
@@ -245,7 +309,7 @@ class SmolcoinExchangeScreenHandler(syncId: Int, playerInventory: PlayerInventor
 @ClientOnly
 class SmolcoinExchangeScreen(handler: SmolcoinExchangeScreenHandler, inventory: PlayerInventory) : HandledScreen<SmolcoinExchangeScreenHandler>(handler, inventory, Text.translatable("block.smolcoins.exchange")) {
     companion object {
-        private val TEXTURE = Identifier("smolcoins:textures/gui/exchange.png")
+        val TEXTURE = Identifier("smolcoins:textures/gui/exchange.png")
     }
     override fun init() {
         super.init()

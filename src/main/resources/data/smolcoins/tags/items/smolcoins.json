@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "smolcoins:smolcoin_1",
+    "smolcoins:smolcoin_5",
+    "smolcoins:smolcoin_10",
+    "smolcoins:smolcoin_25",
+    "smolcoins:smolcoin_50",
+    "smolcoins:smolcoin_100"
+  ]
+}

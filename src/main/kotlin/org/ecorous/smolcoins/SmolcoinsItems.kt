@@ -5,6 +5,7 @@ import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
 import net.minecraft.registry.Registries
+import net.minecraft.registry.tag.TagKey
 import net.minecraft.text.Text
 import org.ecorous.smolcoins.block.SmolcoinExchangeBlock
 import org.ecorous.smolcoins.init.SmolcoinsInit
@@ -21,6 +22,8 @@ object SmolcoinsItems {
     val smolcoin_50: Item = Item(SMOLCOIN_SETTINGS)
     val smolcoin_100: Item = Item(SMOLCOIN_SETTINGS)
     val exchangeBlockItem = BlockItem(SmolcoinExchangeBlock, QuiltItemSettings())
+
+    val smolcoinTag: TagKey<Item> = TagKey.of(Registries.ITEM.key, SmolcoinsInit.id("smolcoins"))
 
     val itemGroup: ItemGroup = FabricItemGroup.builder()
         .icon { smolcoin_100.defaultStack }
