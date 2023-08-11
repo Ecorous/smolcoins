@@ -2,10 +2,10 @@
   "replace": false,
   "values": {
     "minecraft:coal": 1,
-    "minecraft:copper_block": 5,
+    "minecraft:copper_ingot": 1,
     "minecraft:iron_ingot": 5,
-    "minecraft:gold_ingot": 5,
-    "minecraft:diamond": 45,
+    "minecraft:gold_ingot": 10,
+    "minecraft:diamond": 50,
     "minecraft:netherite_ingot": 100,
 
     "smolcoins:smolcoin_100": 100,

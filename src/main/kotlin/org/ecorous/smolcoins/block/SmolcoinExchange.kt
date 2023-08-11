@@ -8,6 +8,8 @@ import dev.emi.emi.api.render.EmiTexture
 import dev.emi.emi.api.stack.EmiIngredient
 import dev.emi.emi.api.stack.EmiStack
 import dev.emi.emi.api.widget.WidgetHolder
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry
 import net.minecraft.block.BlockRenderType
 import net.minecraft.block.BlockState
 import net.minecraft.block.BlockWithEntity
@@ -15,7 +17,6 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screen.ingame.HandledScreen
-import net.minecraft.entity.ItemEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.feature_flags.FeatureFlags
@@ -32,18 +33,20 @@ import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerType
 import net.minecraft.screen.slot.FurnaceOutputSlot
 import net.minecraft.screen.slot.Slot
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.BlockSoundGroup
 import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.Identifier
+import net.minecraft.util.ItemScatterer
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
+import net.minecraft.world.GameRules
 import net.minecraft.world.World
 import org.ecorous.smolcoins.SmolcoinsItems
-import org.ecorous.smolcoins.block.SmolcoinExchange.canAddCoins
 import org.ecorous.smolcoins.block.SmolcoinExchange.exchangeBlockEntity
 import org.ecorous.smolcoins.block.SmolcoinExchange.exchangeScreenHandlerType
 import org.ecorous.smolcoins.block.SmolcoinExchange.itemsToSmolcoins
@@ -58,7 +61,7 @@ import org.quiltmc.qsl.block.entity.api.QuiltBlockEntityTypeBuilder
 import org.quiltmc.qsl.block.extensions.api.QuiltBlockSettings
 
 object SmolcoinExchange {
-
+    val exchangeBreakable = GameRuleRegistry.register("smolcoinExchangeBreakable", GameRules.Category.MISC, GameRuleFactory.createBooleanRule(true))
     var smolcoinConversions = mutableMapOf<Identifier, Int>()
     val exchangeBlockEntity: BlockEntityType<SmolcoinExchangeBlockEntity> = QuiltBlockEntityTypeBuilder.create({ pos, state ->
         SmolcoinExchangeBlockEntity(pos, state)
@@ -123,13 +126,6 @@ object SmolcoinExchange {
         val smolcoins1 = items.getOrNull(5)?.count ?: 0
         return (smolcoins100 * 100) + (smolcoins50 * 50) + (smolcoins25 * 25) + (smolcoins10 * 10) + (smolcoins5 * 5) + smolcoins1
     }
-    fun canAddCoins(coinCount: Int, existing: List<ItemStack>): Boolean {
-        val coinItems = smolcoinsToItems(coinCount)
-        for(i in coinItems.indices) {
-            if(existing[i].count + coinItems[i].count > 64) return false
-        }
-        return true
-    }
 }
 @ClientOnly
 class SmolcoinExchangeEmiRecipe(val item: Identifier, val coins: Int) : EmiRecipe {
@@ -167,7 +163,7 @@ class SmolcoinExchangeEmiRecipe(val item: Identifier, val coins: Int) : EmiRecip
     }
 }
 
-object SmolcoinExchangeBlock : BlockWithEntity(QuiltBlockSettings.create().sounds(BlockSoundGroup.WOOD).strength(Float.MAX_VALUE)) {
+object SmolcoinExchangeBlock : BlockWithEntity(QuiltBlockSettings.create().sounds(BlockSoundGroup.WOOD).strength(2.5f)) {
     override fun createBlockEntity(pos: BlockPos, state: BlockState) = SmolcoinExchangeBlockEntity(pos, state)
     override fun <T : BlockEntity?> getTicker(
         world: World?,
@@ -186,6 +182,22 @@ object SmolcoinExchangeBlock : BlockWithEntity(QuiltBlockSettings.create().sound
         player?.openHandledScreen(world?.getBlockEntity(pos) as? SmolcoinExchangeBlockEntity)
         return ActionResult.SUCCESS
     }
+    override fun onStateReplaced(
+        state: BlockState,
+        world: World,
+        pos: BlockPos?,
+        newState: BlockState,
+        moved: Boolean
+    ) {
+        if (!state.isOf(newState.block)) {
+            val blockEntity = world.getBlockEntity(pos)
+            if (blockEntity is Inventory) {
+                ItemScatterer.spawn(world, pos, blockEntity as Inventory?)
+                world.updateComparators(pos, this)
+            }
+            super.onStateReplaced(state, world, pos, newState, moved)
+        }
+    }
 }
 class SmolcoinExchangeBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(exchangeBlockEntity, pos, state),
     SmolcoinExchangeInventory, SidedInventory,
@@ -199,7 +211,7 @@ class SmolcoinExchangeBlockEntity(pos: BlockPos, state: BlockState) : BlockEntit
         val coinCount = smolcoinConversions[Registries.ITEM.getId(inventory[0].item)] ?: 0
         if(coinCount == 0) return
         val containedCoins = inventory.subList(1, 7)
-        if(!canAddCoins(coinCount, containedCoins)) return
+        if(containedCoins[0].item == SmolcoinsItems.smolcoin_100 && containedCoins[0].count == 64) return
         val coinsToDispense = smolcoinsToItems(coinCount)
         println(coinsToDispense.size)
         val slotMap = hashMapOf(
@@ -211,9 +223,7 @@ class SmolcoinExchangeBlockEntity(pos: BlockPos, state: BlockState) : BlockEntit
             SmolcoinsItems.smolcoin_100 to 1
         )
         for(coin in coinsToDispense) {
-            if(!tryInsert(slotMap[coin.item] ?: -1, coin)) {
-                world.spawnEntity(ItemEntity(world, pos.x.toDouble() + 0.5, pos.y.toDouble() + 1.0, pos.z.toDouble() + 0.5, coin))
-            }
+            tryInsert(slotMap[coin.item] ?: -1, coin)
         }
         inventory[0].decrement(1)
         val allCoins = smolcoinsToItems(itemsToSmolcoins(inventory.subList(1, inventory.size).toTypedArray()))
