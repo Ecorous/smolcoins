@@ -21,6 +21,7 @@ import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.feature_flags.FeatureFlags
 import net.minecraft.inventory.Inventories
 import net.minecraft.inventory.Inventory
+import net.minecraft.inventory.SidedInventory
 import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NbtCompound
@@ -39,8 +40,10 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 import org.ecorous.smolcoins.SmolcoinsItems
+import org.ecorous.smolcoins.block.SmolcoinExchange.canAddCoins
 import org.ecorous.smolcoins.block.SmolcoinExchange.exchangeBlockEntity
 import org.ecorous.smolcoins.block.SmolcoinExchange.exchangeScreenHandlerType
 import org.ecorous.smolcoins.block.SmolcoinExchange.itemsToSmolcoins
@@ -120,6 +123,13 @@ object SmolcoinExchange {
         val smolcoins1 = items.getOrNull(5)?.count ?: 0
         return (smolcoins100 * 100) + (smolcoins50 * 50) + (smolcoins25 * 25) + (smolcoins10 * 10) + (smolcoins5 * 5) + smolcoins1
     }
+    fun canAddCoins(coinCount: Int, existing: List<ItemStack>): Boolean {
+        val coinItems = smolcoinsToItems(coinCount)
+        for(i in coinItems.indices) {
+            if(existing[i].count + coinItems[i].count > 64) return false
+        }
+        return true
+    }
 }
 @ClientOnly
 class SmolcoinExchangeEmiRecipe(val item: Identifier, val coins: Int) : EmiRecipe {
@@ -178,14 +188,18 @@ object SmolcoinExchangeBlock : BlockWithEntity(QuiltBlockSettings.create().sound
     }
 }
 class SmolcoinExchangeBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(exchangeBlockEntity, pos, state),
-    InventoryImpl,
+    SmolcoinExchangeInventory, SidedInventory,
     NamedScreenHandlerFactory {
     override var inventory: DefaultedList<ItemStack> = DefaultedList.ofSize(7, ItemStack.EMPTY)
+    override fun getAvailableSlots(side: Direction?) = intArrayOf(0, 1, 2, 3, 4, 5, 6)
+
     fun tick(world: World, pos: BlockPos) {
         if(world.isClient) return
         if(inventory[0].isEmpty) return
         val coinCount = smolcoinConversions[Registries.ITEM.getId(inventory[0].item)] ?: 0
         if(coinCount == 0) return
+        val containedCoins = inventory.subList(1, 7)
+        if(!canAddCoins(coinCount, containedCoins)) return
         val coinsToDispense = smolcoinsToItems(coinCount)
         println(coinsToDispense.size)
         val slotMap = hashMapOf(
@@ -327,7 +341,7 @@ class SmolcoinExchangeScreen(handler: SmolcoinExchangeScreenHandler, inventory: 
         graphics?.drawTexture(TEXTURE, i, j, 0, 0, backgroundWidth, backgroundHeight)
     }
 }
-interface InventoryImpl : Inventory {
+interface SmolcoinExchangeInventory : SidedInventory {
     val inventory: DefaultedList<ItemStack>
     override fun clear() {
         inventory.clear()
@@ -364,5 +378,13 @@ interface InventoryImpl : Inventory {
 
     override fun canPlayerUse(player: PlayerEntity?): Boolean {
         return true
+    }
+
+    override fun canInsert(slot: Int, stack: ItemStack?, dir: Direction?): Boolean {
+        return slot == 0
+    }
+
+    override fun canExtract(slot: Int, stack: ItemStack, dir: Direction?): Boolean {
+        return slot > 0 && stack.isIn(SmolcoinsItems.smolcoinTag)
     }
 }
