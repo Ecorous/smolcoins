@@ -7,10 +7,10 @@
   ],
   "key": {
     "C": {
-      "item": "smolcoins:smolcoin_100"
+      "tag": "smolcoins:smolcoins"
     },
     "W": {
-      "tag": "minecraft:stripped_logs"
+      "tag": "minecraft:planks"
     }
   },
   "result": {

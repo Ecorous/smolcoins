@@ -1,0 +1,22 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"0": "smolcoins:block/coin_slot",
+		"particle": "smolcoins:block/coin_slot"
+	},
+	"elements": [
+		{
+			"from": [5, 0, 4],
+			"to": [11, 1, 12],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 8]},
+			"faces": {
+				"north": {"uv": [14, 8, 8, 9], "rotation": 180, "texture": "#0"},
+				"east": {"uv": [0, 8, 1, 16], "rotation": 270, "texture": "#0"},
+				"south": {"uv": [8, 9, 2, 8], "texture": "#0"},
+				"west": {"uv": [1, 8, 2, 16], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [0, 0, 6, 8], "rotation": 180, "texture": "#0"},
+				"down": {"uv": [6, 0, 12, 8], "texture": "#0"}
+			}
+		}
+	]
+}

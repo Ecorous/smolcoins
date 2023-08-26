@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CHC",
+    " C ",
+    " R "
+  ],
+  "key": {
+    "C": {
+      "tag": "smolcoins:smolcoins"
+    },
+    "H": {
+      "item": "minecraft:hopper"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "item": "smolcoins:coin_slot"
+  }
+}
+

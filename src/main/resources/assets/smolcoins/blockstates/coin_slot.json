@@ -1,0 +1,58 @@
+{
+  "variants": {
+    "face=ceiling,facing=east": {
+      "model": "smolcoins:block/coin_slot",
+      "x": 180,
+      "y": 270
+    },
+    "face=ceiling,facing=north": {
+      "model": "smolcoins:block/coin_slot",
+      "x": 180,
+      "y": 180
+    },
+    "face=ceiling,facing=south": {
+      "model": "smolcoins:block/coin_slot",
+      "x": 180
+    },
+    "face=ceiling,facing=west": {
+      "model": "smolcoins:block/coin_slot",
+      "x": 180,
+      "y": 90
+    },
+    "face=floor,facing=east": {
+      "model": "smolcoins:block/coin_slot",
+      "y": 270
+    },
+    "face=floor,facing=north": {
+      "model": "smolcoins:block/coin_slot",
+      "y": 180
+    },
+    "face=floor,facing=south": {
+      "model": "smolcoins:block/coin_slot"
+    },
+    "face=floor,facing=west": {
+      "model": "smolcoins:block/coin_slot",
+      "y": 90
+    },
+    "face=wall,facing=east": {
+      "model": "smolcoins:block/coin_slot",
+      "x": 90,
+      "y": -270
+    },
+    "face=wall,facing=north": {
+      "model": "smolcoins:block/coin_slot",
+      "x": 90,
+      "y": -360
+    },
+    "face=wall,facing=south": {
+      "model": "smolcoins:block/coin_slot",
+      "x": 90,
+      "y": -180
+    },
+    "face=wall,facing=west": {
+      "model": "smolcoins:block/coin_slot",
+      "x": 90,
+      "y": -90
+    }
+  }
+}
