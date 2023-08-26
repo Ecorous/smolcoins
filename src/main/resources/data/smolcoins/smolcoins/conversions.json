@@ -7,6 +7,13 @@
     "minecraft:gold_ingot": 5,
     "minecraft:diamond": 45,
     "minecraft:emerald": 30,
-    "minecraft:netherite_ingot": 100
+    "minecraft:netherite_ingot": 100,
+
+    "smolcoins:smolcoin_1": 1,
+    "smolcoins:smolcoin_5": 5,
+    "smolcoins:smolcoin_10": 10,
+    "smolcoins:smolcoin_25": 25,
+    "smolcoins:smolcoin_50": 50,
+    "smolcoins:smolcoin_100": 100
   }
 }

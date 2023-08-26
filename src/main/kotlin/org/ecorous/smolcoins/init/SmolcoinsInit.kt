@@ -1,9 +1,8 @@
 package org.ecorous.smolcoins.init
 
-import net.minecraft.item.ItemStack
 import net.minecraft.resource.ResourceType
 import net.minecraft.util.Identifier
-import org.ecorous.smolcoins.SmolcoinsItems
+import org.ecorous.smolcoins.item.SmolcoinsItems
 
 import org.ecorous.smolcoins.block.SmolcoinsBlocks
 import org.ecorous.smolcoins.data.SmolcoinsResourceReloader

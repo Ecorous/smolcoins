@@ -7,9 +7,17 @@
   "item.smolcoins.smolcoin_25": "25 Smolcoins",
   "item.smolcoins.smolcoin_50": "50 Smolcoins",
   "item.smolcoins.smolcoin_100": "100 Smolcoins",
-
+  "item.smolcoins.key": "Smolcoin Key",
+  "item.smolcoins.key.sep": "%s at %s",
   "tag.item.smolcoins.smolcoins": "Smolcoin (any value)",
 
   "block.smolcoins.exchange": "Smolcoin Exchange",
+  "block.smolcoins.coin_slot": "Coin Slot",
+  "block.smolcoins.pos.increase": "Activation amount increased to %d.",
+  "block.smolcoins.pos.lock": "Locked. Activates at %d coins.",
+  "block.smolcoins.pos.query": "Activates at %d coins.",
+  "block.smolcoins.pos.kquery": "%d/%d stored, %d to activate.",
+  "block.smolcoins.pos.activate": "Activated. %d coins change.",
+
   "emi.category.smolcoins.exchange": "Smolcoin Exchanging"
 }
